@@ -4,6 +4,7 @@ const expressGraphQL = require('express-graphql');
 const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt, GraphQLNonNull } = require('graphql');
 //extract what would be server data into its own file
 const { books, authors } = require("./exampleData")
+const fs = require('fs')
 
 const app = express();
 
@@ -61,12 +62,41 @@ const RootQueryType = new GraphQLObjectType({
             type: new GraphQLList(AuthorType),
             description: 'List of all authors',
             resolve: () => authors
+        },
+        author: {
+            type: AuthorType,
+            description: 'List a single author',
+            args: {
+                id: { type: GraphQLInt }
+            },
+            resolve: (parent, args) => authors.find(author => author.id === args.id)
+        }
+    })
+})
+
+const RootMutuationType = new GraphQLObjectType({
+    name: 'Mutation',
+    description: 'Root mutation',
+    fields: () => ({
+        addBook: {
+            type: BookType,
+            description: 'Add a book',
+            args: {
+                name: { type: GraphQLNonNull(GraphQLString) },
+                authorId: { type: GraphQLNonNull(GraphQLInt) },
+            },
+            resolve: (parent, args) => {
+                const book = { id: books.length + 1, name: args.name, authorId: args.authorId }
+                books.push(book)
+                return book; // TODO: use fs.writefile to append the new book to the other JS file
+            }
         }
     })
 })
 
 const schema = new GraphQLSchema({
-    query: RootQueryType
+    query: RootQueryType,
+    mutation: RootMutuationType
 })
 
 // simple express server
