@@ -14,7 +14,28 @@ const BookType = new GraphQLObjectType({
     fields: () => ({
         id: { type: GraphQLNonNull(GraphQLInt) }, // must be a new non nullable type of int
         name: { type: GraphQLNonNull(GraphQLString) }, // also non nullable type of string
-        authorId: { type: GraphQLNonNull(GraphQLInt) } // 
+        authorId: { type: GraphQLNonNull(GraphQLInt) }, // non nullable type of int
+        author: {
+            type: AuthorType,
+            resolve: (book) => {
+                return authors.find(author => author.id === book.authorId)
+            }
+        }
+    })
+})
+
+const AuthorType = new GraphQLObjectType({
+    name: "Author",
+    description: 'This represents an author of a book',
+    fields: () => ({
+        id: { type: GraphQLNonNull(GraphQLInt) }, // must be a new non nullable type of int
+        name: { type: GraphQLNonNull(GraphQLString) }, // also non nullable type of string
+        books: {
+            type: new GraphQLList(BookType),
+            resolve: (author) => {
+                return books.filter(book => book.authorId === author.id)
+            }
+        }
     })
 })
 
@@ -23,10 +44,23 @@ const RootQueryType = new GraphQLObjectType({
     name: 'Query',
     description: 'Root Query',
     fields: () => ({
+        book: {
+            type: BookType,
+            description: 'List a single book',
+            args: {
+                id: { type: GraphQLInt }
+            },
+            resolve: (parent, args) => books.find(book => book.id === args.id)
+        },
         books: {
             type: new GraphQLList(BookType),
             description: 'List of all books',
             resolve: () => books
+        },
+        authors: {
+            type: new GraphQLList(AuthorType),
+            description: 'List of all authors',
+            resolve: () => authors
         }
     })
 })
