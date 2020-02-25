@@ -1,9 +1,7 @@
 const express = require('express');
 const expressGraphQL = require('express-graphql');
-// import only what we need in terms of types
-const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt, GraphQLNonNull } = require('graphql');
-//extract what would be server data into its own file
-const { books, authors } = require("./exampleData")
+const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLInt, GraphQLNonNull } = require('graphql'); // import only what we need in terms of types
+const { books, authors } = require("./exampleData") //extract what would be server data into its own file
 const fs = require('fs')
 
 const app = express();
@@ -87,8 +85,20 @@ const RootMutuationType = new GraphQLObjectType({
             },
             resolve: (parent, args) => {
                 const book = { id: books.length + 1, name: args.name, authorId: args.authorId }
-                books.push(book)
-                return book; // TODO: use fs.writefile to append the new book to the other JS file
+                books.push(book)// TODO: use fs.writefile to append the new book to the other JS file
+                return book;
+            }
+        },
+        addAuthor: {
+            type: AuthorType,
+            description: 'Add an author',
+            args: {
+                name: { type: GraphQLNonNull(GraphQLString) }
+            },
+            resolve: (parent, args) => {
+                const author = { id: authors.length + 1, name: args.name }
+                authors.push(author)  // TODO: use fs.writefile to append the new book to the other JS file
+                return author;
             }
         }
     })
