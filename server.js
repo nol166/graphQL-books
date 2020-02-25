@@ -1,12 +1,13 @@
 const express = require('express');
-const expressGraphQL = require('express-graphQL');
+const expressGraphQL = require('express-graphql');
 const { GraphQLSchema, GraphQLObjectType, GraphQLString } = require('graphql')
+import { authors, books } from './exampleData'
 
 const app = express();
 
 const schema = new GraphQLSchema({
     query: new GraphQLObjectType({
-        name: 'Hello world',
+        name: 'HelloWorld',
         fields: () => ({
             messsage: {
                 type: GraphQLString,
@@ -17,6 +18,7 @@ const schema = new GraphQLSchema({
 })
 
 app.use('/graphql', expressGraphQL({
-    grapiql: true
+    schema: schema,
+    graphiql: true
 }))
 app.listen(5000., () => console.log("server running on port 5000"))
